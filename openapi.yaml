@@ -1,0 +1,322 @@
+openapi: 3.0.0
+info:
+    title: CrystalDB API
+    description: The fastest and easiest way to create and use PostgreSQL databases.
+    contact: {}
+    license:
+        name: Apache 2.0
+        url: http://www.apache.org/licenses/LICENSE-2.0.html
+    version: "1.0"
+servers:
+    - url: //stage0.crystaldev.cloud/api/v1/
+paths:
+    /database_instance/:
+        get:
+            tags:
+                - read
+            summary: Describes all database instances
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/domain.DatabaseInstanceDescription"
+                "401":
+                    description: Not authorized
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+            security:
+                - ApiKeyAuth: []
+        post:
+            tags:
+                - write
+            summary: Creates a database instance
+            requestBody:
+                description: New Database
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/create.DatabaseInstancee"
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/domain.DatabaseInstanceCreated"
+                "401":
+                    description: Not authorized
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+            security:
+                - ApiKeyAuth: []
+            x-codegen-request-body-name: database
+    /database_instance/{database_uuid}:
+        get:
+            tags:
+                - read
+            summary: Describes a database instance
+            parameters:
+                - name: database_uuid
+                  in: path
+                  description: Database UUID
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/domain.DatabaseInstanceCreated"
+                "401":
+                    description: Not authorized
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                "404":
+                    description: Not found
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+            security:
+                - ApiKeyAuth: []
+    /database_instance/{database_uuid}/delete:
+        post:
+            tags:
+                - write
+            summary: Deletes a database instance
+            description:
+                Deleted database instances can be restored for up to 30 days from
+                deletion.
+            parameters:
+                - name: database_uuid
+                  in: path
+                  description: Database UUID
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                "401":
+                    description: Not authorized
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                "404":
+                    description: Not found
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+            security:
+                - ApiKeyAuth: []
+    /database_instance/{database_uuid}/undelete:
+        post:
+            tags:
+                - write
+            summary: Undeletes a database instance
+            description:
+                Deleted database instances can be restored for up to 30 days from
+                deletion.
+            parameters:
+                - name: database_uuid
+                  in: path
+                  description: Database UUID
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+                "401":
+                    description: Not authorized
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                "404":
+                    description: Not found
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+            security:
+                - ApiKeyAuth: []
+    /region:
+        get:
+            tags:
+                - read
+            summary: Returns the list of regions where database instances can be created
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    regions:
+                                        type: array
+                                        items:
+                                            $ref: "#/components/schemas/domain.Region"
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+            security:
+                - ApiKeyAuth: []
+    /organization/:
+        get:
+            tags:
+                - read
+            summary: Describes the current organization associated with an API Key
+            description: Returns the current Organization associated with the API Key.
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/domain.Organization"
+                "401":
+                    description: Not authorized
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+                default:
+                    description: Unexpected error
+                    content:
+                        application/json:
+                            schema:
+                                type: string
+            security:
+                - ApiKeyAuth: []
+components:
+    schemas:
+        domain.DatabaseInstanceCreated:
+            type: object
+            properties:
+                connection_string:
+                    type: string
+                connection_uri:
+                    type: string
+                created_at:
+                    type: integer
+                    description: Unix Epoch time
+                current_state:
+                    $ref: "#/components/schemas/domain.CommitState"
+                database_uuid:
+                    type: string
+                name:
+                    type: string
+                postgres_version:
+                    type: string
+                region:
+                    type: string
+                superuser_password:
+                    type: string
+        domain.DatabaseInstanceDescription:
+            type: object
+            properties:
+                created_at:
+                    type: integer
+                    description: Unix Epoch time
+                current_state:
+                    $ref: "#/components/schemas/domain.CommitState"
+                database_uuid:
+                    type: string
+                name:
+                    type: string
+                postgres_version:
+                    type: string
+                region:
+                    type: string
+        domain.CommitState:
+            type: integer
+            enum:
+                - 0
+                - 1
+                - 2
+                - 3
+            x-enum-varnames:
+                - Pending
+                - Created
+                - PendingDelete
+                - Deleted
+        domain.Organization:
+            type: object
+            properties:
+                created_at:
+                    type: integer
+                is_active:
+                    type: boolean
+                name:
+                    type: string
+                organization_uuid:
+                    type: string
+        domain.Region:
+            type: object
+            properties:
+                region:
+                    type: string
+        create.DatabaseInstancee:
+            type: object
+            properties:
+                postgres_version:
+                    type: string
+                    example: "15.4"
+                region:
+                    type: string
+                    example: aws:us-west-2
+                name:
+                    type: string
+                    example: my-database-1
+    securitySchemes:
+        ApiKeyAuth:
+            type: apiKey
+            name: X-API-KEY
+            in: header
+x-original-swagger-version: "2.0"
